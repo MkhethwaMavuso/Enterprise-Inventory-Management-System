@@ -1,0 +1,19 @@
+{
+  "name": "assetpulse-monorepo",
+  "private": true,
+  "workspaces": ["packages/*", "apps/*"],
+  "scripts": {
+    "dev": "concurrently -k -n api,web -c cyan,magenta \"npm:dev --workspace=@assetpulse/server\" \"npm:dev --workspace=@assetpulse/client\"",
+    "build": "npm run build --workspace=@assetpulse/db && npm run build --workspace=@assetpulse/server && npm run build --workspace=@assetpulse/client",
+    "db:generate": "npm run prisma:generate --workspace=@assetpulse/db",
+    "db:migrate": "npm run prisma:migrate --workspace=@assetpulse/db",
+    "db:deploy": "npm run prisma:deploy --workspace=@assetpulse/db",
+    "db:studio": "npm run prisma:studio --workspace=@assetpulse/db"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "engines": {
+    "node": ">=20.11"
+  }
+}

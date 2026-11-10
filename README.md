@@ -31,88 +31,35 @@ Security & Auth: NextAuth.js / JWT Sessions / bcrypt password hashing / CORS & M
 
 Infrastructure & Tooling: Vercel Edge Deployment / Docker / Git & GitHub CI/CD Pipeline
 
-🗺️ 4. System Architecture & Logical Flow
+# AssetPulse
 
-High-Level Pipeline
+AssetPulse is a monorepo for serialized asset tracking and bulk inventory management. It uses Next.js 15, an Express REST API, Prisma, and PostgreSQL.
 
-Client UI (Next.js 15 App Router)
-       │
-       ▼
-Next.js Middleware / Auth Check (NextAuth JWT)
-       │
-       ▼
-Server Actions / Business Logic Layer (Zod Validated)
-       │
-       ▼
-Prisma ORM Pipeline
-       │
-       ▼
-PostgreSQL Managed Database (3NF Schema)
+## Requirements
 
+- Node.js 20.11 or newer and npm 10+
+- PostgreSQL 15+
 
-Logical User Flow
+## Local development
 
-Authentication: Users log in via secure credentials; NextAuth issues a signed JWT containing explicit role claims (ADMIN, MANAGER, STAFF, EXECUTIVE).
+1. Copy `apps/server/.env.example` to `apps/server/.env` and set `DATABASE_URL` and a random `JWT_SECRET` (at least 32 characters). Copy `apps/client/.env.example` to `apps/client/.env.local`.
+2. Install dependencies with `npm install`.
+3. Generate the Prisma client and apply the initial migration: `npm run db:generate` then `npm run db:migrate`.
+4. Create an initial administrator using the procedure below, then start both applications with `npm run dev`.
 
-Authorization: Next.js edge middleware intercepts incoming requests, verifying the user's RBAC claims against target routes and server action primitives.
+The frontend is at http://localhost:3000 and the API is at http://localhost:4000. To create the first user, run `npm run user:create -w @assetpulse/server -- --email admin@example.com --password 'change-this-password' --first-name Asset --last-name Admin --role ADMIN`.
 
-Execution: Validated operations trigger Prisma ORM queries to update PostgreSQL asset records, write an immutable AuditLog entry, and revalidate the UI in real time via Next.js cache primitives.
+## Commands
 
-🌟 5. Key Features & Capabilities
+- `npm run dev`: run the web app and API concurrently
+- `npm run build`: build the shared database package, API, and web app
+- `npm run db:migrate`: create/apply a local Prisma migration
+- `npm run db:deploy`: apply checked-in migrations in deployment
+- `npm run db:studio`: open Prisma Studio
 
-🔒 Granular RBAC: Four distinct role tiers (Admin, Manager, Staff, Executive) enforcing endpoint and action-level permissions.
+For deployment, configure `DATABASE_URL`, `JWT_SECRET`, and `CLIENT_ORIGIN` on Render. Deploy the Next.js app on Netlify with `NEXT_PUBLIC_API_URL` set to the Render API URL. Run `npm run db:deploy` as the Render pre-deploy command. The API listens on Render's `PORT`.
 
+The audit log is append-only through the API. Use a database role without update/delete permissions on `AuditLog` for stronger database-enforced immutability in production.
+
+See [LICENSE](LICENSE) for license information.
 ⚡ Real-Time Tracking: Instant inventory stock level recalculation, low-stock alerts, and activity feed sync.
-
-🛡️ Immutable Audit Logging: Every check-out, restock, status adjustment, and user creation action is permanently logged with timestamps and user references.
-
-📊 Executive KPI Dashboard: Real-time financial analytics summarizing total fleet valuation, active unit counts, and critical reorder thresholds.
-
-🗄️ Normalized Schema: Optimized PostgreSQL 3NF relational design leveraging compound indexes on SKUs and statuses for high-frequency queries.
-
-⚙️ 6. Getting Started Locally (Quickstart)
-
-Prerequisites
-
-Node.js 18.x or higher installed locally.
-
-A running PostgreSQL database instance.
-
-Installation Steps
-
-Clone the Repository:
-
-git clone https://github.com/YourUsername/assetpulse-inventory.git
-cd assetpulse-inventory
-
-
-Install Dependencies:
-
-npm install
-
-
-Configure Environment Variables:
-Create a .env file in the root directory and add your connection keys:
-
-DATABASE_URL="postgresql://postgres:password@localhost:5432/assetpulse_db?schema=public"
-NEXTAUTH_SECRET="your_super_secret_cryptographic_key"
-NEXTAUTH_URL="http://localhost:3000"
-
-
-Initialize Database Schema:
-
-npx prisma db push
-
-
-Run the Application:
-
-npm run dev
-
-
-Open http://localhost:3000 to access the AssetPulse dashboard.
-
-📄 License
-
-Distributed under the MIT License. See LICENSE for more information.
-
-Author: Developed by Mkhethwa Mavuso — Senior Full-Stack Architect & Enterprise Systems Engineer.

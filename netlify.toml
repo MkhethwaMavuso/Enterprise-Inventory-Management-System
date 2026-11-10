@@ -1,0 +1,6 @@
+[build]
+command = "npm run build --workspace=@assetpulse/client"
+publish = "apps/client/out"
+
+[build.environment]
+NODE_VERSION = "20"

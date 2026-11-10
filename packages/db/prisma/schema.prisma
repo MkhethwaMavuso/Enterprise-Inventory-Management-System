@@ -1,0 +1,132 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  STAFF
+  EXECUTIVE
+}
+
+enum AssetStatus {
+  AVAILABLE
+  ASSIGNED
+  MAINTENANCE
+  RETIRED
+}
+
+model User {
+  id           String           @id @default(uuid()) @db.Uuid
+  email        String           @unique
+  passwordHash String
+  firstName    String
+  lastName     String
+  role         UserRole         @default(STAFF)
+  isActive     Boolean          @default(true)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  assignments  AssetAssignment[]
+  auditLogs    AuditLog[]
+
+  @@index([role, isActive])
+}
+
+model Category {
+  id             String          @id @default(uuid()) @db.Uuid
+  name           String          @unique
+  description    String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  assets         Asset[]
+  inventoryItems InventoryItem[]
+}
+
+model Location {
+  id             String          @id @default(uuid()) @db.Uuid
+  name           String          @unique
+  address        String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  assets         Asset[]
+  inventoryItems InventoryItem[]
+}
+
+model Asset {
+  id            String           @id @default(uuid()) @db.Uuid
+  name          String
+  sku           String           @unique
+  serialNumber  String           @unique
+  status        AssetStatus      @default(AVAILABLE)
+  purchaseDate  DateTime?
+  purchasePrice Decimal?         @db.Decimal(10, 2)
+  categoryId    String           @db.Uuid
+  locationId    String           @db.Uuid
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  category      Category         @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  location      Location         @relation(fields: [locationId], references: [id], onDelete: Restrict)
+  assignments   AssetAssignment[]
+  auditLogs     AuditLog[]
+
+  @@index([status, categoryId])
+  @@index([locationId, status])
+  @@index([createdAt])
+}
+
+model AssetAssignment {
+  id         String    @id @default(uuid()) @db.Uuid
+  assetId    String    @db.Uuid
+  userId     String    @db.Uuid
+  assignedAt DateTime  @default(now())
+  returnedAt DateTime?
+  notes      String?
+  asset      Asset     @relation(fields: [assetId], references: [id], onDelete: Restrict)
+  user       User      @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([assetId, returnedAt])
+  @@index([userId, returnedAt])
+  @@index([assignedAt])
+}
+
+model InventoryItem {
+  id           String   @id @default(uuid()) @db.Uuid
+  name         String
+  sku          String   @unique
+  quantity     Int      @default(0)
+  minThreshold Int      @default(5)
+  unitPrice    Decimal  @db.Decimal(10, 2)
+  categoryId   String   @db.Uuid
+  locationId   String   @db.Uuid
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  category     Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  location     Location @relation(fields: [locationId], references: [id], onDelete: Restrict)
+
+  @@index([quantity, minThreshold])
+  @@index([categoryId, locationId])
+  @@index([updatedAt])
+}
+
+model AuditLog {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @db.Uuid
+  assetId    String?  @db.Uuid
+  action     String
+  entityType String
+  entityId   String
+  details    Json?
+  ipAddress  String?
+  timestamp  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+  asset      Asset?   @relation(fields: [assetId], references: [id], onDelete: Restrict)
+
+  @@index([entityType, entityId, timestamp])
+  @@index([userId, timestamp])
+  @@index([timestamp])
+}

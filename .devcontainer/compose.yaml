@@ -1,0 +1,21 @@
+services:
+  workspace:
+    image: mcr.microsoft.com/devcontainers/typescript-node:1-20-bookworm
+    command: sleep infinity
+    volumes:
+      - ..:/workspaces:cached
+    depends_on:
+      - postgres
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: assetpulse
+      POSTGRES_PASSWORD: assetpulse
+      POSTGRES_DB: assetpulse
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+volumes:
+  postgres-data:

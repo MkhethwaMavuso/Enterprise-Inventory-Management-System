@@ -1,0 +1,25 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+:root {
+  color-scheme: dark;
+  --canvas: #101515;
+  --panel: #171e1d;
+  --line: #2a3532;
+  --muted: #8d9a95;
+  --ink: #edf2eb;
+  --lime: #c6ef73;
+  --teal: #6ac9b3;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--canvas); color: var(--ink); font-family: 'Manrope', sans-serif; }
+button, input, select { font: inherit; }
+button { cursor: pointer; }
+.mono { font-family: 'DM Mono', monospace; }
+.grid-noise { background-image: linear-gradient(rgba(179, 216, 185, .035) 1px, transparent 1px), linear-gradient(90deg, rgba(179, 216, 185, .035) 1px, transparent 1px); background-size: 34px 34px; }
+.fade-in { animation: rise .45s ease both; }
+main.employee-mode > .overview-heading,
+main.employee-mode > section { display: none; }
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+select option { background: #171e1d; }
